@@ -233,7 +233,7 @@ class SOMAManager():
         return source
             
 
-    def add_object(self, soma_type, pose):
+    def add_object(self, soma_type, pose,waypoint):
         # todo: add to mongodb
         
         soma_id = self._next_id()
@@ -249,7 +249,7 @@ class SOMAManager():
         soma_obj.mesh = self.mesh[soma_type]
         #soma_obj.waypoint=self.locate(pose)
 
-        meta={ "WayPoint" : self.locate(pose) }
+        meta={ "WayPoint" : waypoint }
         _id = self._msg_store.insert(soma_obj,meta)
         self._soma_obj_ids[soma_obj.id] = _id
         self._soma_obj_msg[soma_obj.id] = soma_obj

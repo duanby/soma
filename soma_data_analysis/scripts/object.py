@@ -11,6 +11,7 @@ import numpy as np
 import pylab as pl
 import matplotlib.pyplot as plt
 from unidecode import unidecode
+#from aklearn.cluster import KMeans
 from scipy.cluster.vq import kmeans,vq
 from matplotlib.mlab import PCA
 from scipy.optimize import fmin_bfgs, fmin_l_bfgs_b
@@ -32,15 +33,15 @@ class identify_objects:
          self.prob=dict()
          self.points=dict()
          self.label=dict()
-         label_names=json.load(open("data/label_names_large.json","r"))
+         label_names=json.load(open("label_names_large.json","r"))
          self.label_names=label_names[waypoint]
          self.objects=dict()
          self.position_matrix=dict()
          for instance in instances:
              print 'for', instance
              self.objects[instance]=dict()
-             self.points[instance]=json.load(open('data/'+waypoint+str(instance)+"points_large.json","r"))
-             self.prob[instance]=json.load(open('data/'+waypoint+str(instance)+"prob_large.json","r"))
+             self.points[instance]=json.load(open(waypoint+str(instance)+"points_large.json","r"))
+             self.prob[instance]=json.load(open(waypoint+str(instance)+"prob_large.json","r"))
              self.asign_label(waypoint,instance)
              self.position_matrix[instance]=dict()
              for objects in self.label_names[unicode(instance)]:
@@ -115,9 +116,9 @@ class identify_objects:
          self.objects[instance][objects]=dict()
          for i in range(len(centroids)):
              part_feature=np.array(feature[np.where(idx==i)])
-             #print len(part_feature)
+             print len(part_feature)
              if len(part_feature)<50:
-                #print 'ignore this cluster'
+                print 'ignore this cluster'
                 self.objects[instance][objects][i]=[]
              else:
                 maxi=[0]*3
@@ -214,21 +215,15 @@ class identify_objects:
                  except rospy.ROSInterruptException:
                      pass
 
-#judge the spatial relationship between a point and a line in 2D
-     def vector(self,start,end):
-         b=np.array(end)
-         a=np.array(start)
-         return b-a
-     def unit(self,vec):
-         return vec/sum(vec**2)              
+#unfinished part
+#judge the spatial relationship between a point and a line in 2D                
      def pnt2line(self,pnt, start, end):
-        inner=1
-        line_vec = self.vector(start, end)
-        pnt_vec = self.vector(start, pnt)
-        line_len = distance.euclidean(start,end)
-        line_unitvec = self.unit(line_vec)
-        pnt_vec_scaled = pnt_vec*1.0/line_len
-        t = sum(line_unitvec*pnt_vec_scaled)    
+        line_vec = vector(start, end)
+        pnt_vec = vector(start, pnt)
+        line_len = length(line_vec)
+        line_unitvec = unit(line_vec)
+        pnt_vec_scaled = scale(pnt_vec, 1.0/line_len)
+        t = dot(line_unitvec, pnt_vec_scaled)    
         if t < 0.0:
            inner=0
         elif t > 1.0:
@@ -245,29 +240,26 @@ class identify_objects:
         elif self.pnt2line(tv[2],table[3],table[4])==0:
             above=0
         elif self.pnt2line(tv[2],table[4],table[5])==0:
-            above=0
+            above==0
         else:
-            above=1  
-        return above 
+            above==1   
 #compute the possibility of a monitor being above a desk      
      def monitor_spatial(self,waypoint,instances):
-        print 'start counting'
         total=0.0
         count=0.0
         for instance in instances:
-            print 'counting instsance',instance
             self.set_box(waypoint,instance,'table')
             self.set_box(waypoint,instance,'monitor/tv')
             for index, tv in self.objects[instance]['monitor/tv'].items():
                 if tv==[]:
-                   i=0
+                   print ' no tv '
                 else :
                    for index, table in self.objects[instance]['table'].items():
                       if self.above(table,tv):
                           count=count+1
                    total=total+1
         p=count/total
-        print p,count,total
+        print p
         return p
 # define the 'near' relationship between chair and table        
      def near(self,table,chair):
@@ -278,16 +270,14 @@ class identify_objects:
         return near  
 #compute the possibility of a chair being near a table 
      def chair_spatial(self,waypoint,instances):
-        print 'start counting'
         total=0.0
         count=0.0
         for instance in instances:
-            print 'counting instance', instance
             self.set_box(waypoint,instance,'table')
             self.set_box(waypoint,instance,'chair/sofa')
             for index, chair in self.objects[instance]['chair/sofa'].items():
                 if chair==[]:
-                   i=0
+                   print 'no chair'
                 else:
                    for index, table in self.objects[instance]['table'].items():
                        if self.near(table,chair):
@@ -388,30 +378,25 @@ if __name__ == "__main__":
    waypoint=unidecode(json.loads(raw_input('request waypoint')))
    mission=unidecode(json.loads(raw_input('operation')))
    instances=json.loads(raw_input('request instances'))
+   num=json.loads(raw_input('request label'))
    objects=identify_objects(waypoint,instances)
    if mission == 'box':
-      num=json.loads(raw_input('request label')) 
       objects.bounding_box(waypoint,instances[0],label_type[num])
    elif mission == 'cloud':
-      num=json.loads(raw_input('request label'))
       objects.actaul_clouds(waypoint,instances[0],label_type[num])
    elif mission == 'single':
-      num=json.loads(raw_input('request label'))
       obj=json.loads(raw_input('specific object'))
       mean,cov=objects.single_object_over_time(waypoint,instances,label_type[num],obj,draw_region=1)
-   elif mission == 'tv_spatial':
-      objects.monitor_spatial(waypoint,instances)
-   elif mission == 'chair_spatial':
-      objects.chair_spatial(waypoint,instances)
+   #elif mission == 'tv_spatial':
+   #elif mission == 'chair_spatial':
    else :
       print 'wrong order' 
    #waypoint="WayPoint42"
    #instances=[0,1,2,3,4]
-   #req=[u"WayPoint15",[0,1,2,3,4]]
+   #req=[u"WayPoint15",[0]]
    #objects=identify_objects(unidecode(req[0]),req[1])
    #print 'finish setting'
    #mean,cov=objects.single_object_over_time(unidecode(req[0]),req[1],label_type[4],0,draw=0)
    #objects.bounding_box(unidecode(req[0]),req[1][0],label_type[10]) 
    #objects.actaul_clouds(unidecode(req[0]),req[1][0],label_type[4])
    #objects.monitor_spatial(unidecode(req[0]),req[1])
-   #objects.chair_spatial(unidecode(req[0]),req[1])

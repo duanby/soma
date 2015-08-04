@@ -74,17 +74,19 @@ class my_client:
                     self.label_names[waypoint][instance] = label_info.index_to_label_name
                     self.label_prob[waypoint] [instance]= label_info.label_probabilities
                     self.label_frq[waypoint][instance] =  label_info.label_frequencies
-                    print label_info.label_probabilities[0]
-                    sys.exit()
                     position=[]
                     for i in range(len(label_info.points)):
                             position=[label_info.points[i].x, label_info.points[i].y, label_info.points[i].z]+position
                     position=np.array(position).reshape(-1,3)
+                    print position[instance],label_info.points[i].z
                     self.points[waypoint][instance]=position.tolist()
                     self.labels[waypoint][instance]=dict()
                     for i in range(len(label_info.index_to_label_name)):
                         self.labels[waypoint][instance][label_info.index_to_label_name[i]] = label_info.label_frequencies[i]
-
+                    prob=open(waypoint+str(instance)+"prob_large.json","w")
+                    json.dump(self.label_prob[waypoint][instance],prob,indent=4)
+                    points=open(waypoint+str(instance)+"points_large.json","w")
+                    json.dump(self.points[waypoint][instance],points,indent=4)
         #feature matrix for whole & part
                     #a=list(self.label_frq[waypoint][instance])
                     #X=X+a
@@ -138,10 +140,6 @@ class my_client:
         #json.dump(self.new_waypoints,new_waypoints,indent=4)
         #freq=open("freq_large.json","w")
         #json.dump(self.label_frq,freq,indent=4)
-        prob=open("prob_large.json","w")
-        json.dump(self.label_prob,prob,indent=4)
-        points=open("points_large.json","w")
-        json.dump(self.points,points,indent=4)
 
 #distance
     def distance(self,req,draw=0):
@@ -475,8 +473,9 @@ if __name__=="__main__":
     #instances2=[3, 2, 15, 6, 7, 11, 3, 33]
     #test_number2=[0,0,3,1,1,0,8,0,1,6]
     #con_waypointlabel2=[0,0,0,0,0,0,1,2]
-    for i in range(len(waypoints)):
-        request[waypoints[i]]=range(instances[i])
+    #for i in range(1):#in range(len(waypoints)):
+    i=2
+    request[waypoints[i]]=range(instances[i])
     #for i in range(len(waypoints1)):
         #test_instance1[waypoints1[i]]=range(instances1[i])
         #concrete_label1[waypoints1[i]]=con_waypointlabel1[i]
