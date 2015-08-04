@@ -1,6 +1,6 @@
 SOMA data analysis manager
 --------------------------
-5. Run the SOMA object manager:
+5. Run the SOMA data analysis:
 
     ```
     $ rosrun soma_data_analysis object.py 
