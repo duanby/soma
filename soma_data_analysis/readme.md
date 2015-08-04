@@ -10,8 +10,11 @@ input:
 for request waypoint, input one waypoint in the form: "WayPoint42"
 
 for operation, input one of the following operations:
+-----------------------------------------------------
     "box"    :  generate and display bounding boxes given one label and one instance
+    --------------------------------------------------------------------------------
     "cloud"  :  display the point cloud of one label and one instance
+    -----------------------------------------------------------------
     "single" :  compute the distribution of the movement of a single object given a list of instances, one label and one specific object and display the region where this object is movable.
     "tv_spatial" : compute the possibility of a tv being on a table given a list of instances.
     "chair_spatial" : compute the possibility of a chair being near a table given a list of instances.
