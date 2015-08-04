@@ -9,8 +9,7 @@ input:
 
 for request waypoint, input one waypoint in the form: "WayPoint42"
 
-for operation, input one of the following operations:
------------------------------------------------------
+for operation, input one of the following operations:/n
     "box"    :  generate and display bounding boxes given one label and one instance
     --------------------------------------------------------------------------------
     "cloud"  :  display the point cloud of one label and one instance
