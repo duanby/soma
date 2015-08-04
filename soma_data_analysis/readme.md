@@ -6,6 +6,7 @@ SOMA data analysis manager
     $ rosrun soma_data_analysis object.py 
     ```
 input:
+
 for request waypoint, input one waypoint in the form: "WayPoint42"
 
 for operation, input one of the following operations:
