@@ -3,7 +3,7 @@ SOMA data analysis
 Run the SOMA object analysis:
 
     ```
-    $ rosrun soma_data_analysis object.py 
+    $ rosrun soma_data_analysis object_clustering.py 
     ```
 input:
 
